@@ -1,155 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sidebar System</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central Client Login</title>
 <style>
-
-body{
-margin:0;
-font-family:Arial;
-overflow:hidden;
-touch-action:manipulation;
+body { 
+  font-family: Arial; 
+  background:#0f172a; 
+  color:white; 
+  display:flex; 
+  justify-content:center; 
+  align-items:center; 
+  height:100vh; 
+  margin:0; 
 }
-
-/* top bar */
-.topbar{
-height:55px;
-background:#111;
-color:white;
-display:flex;
-align-items:center;
-padding-left:15px;
-font-size:22px;
+.container { 
+  background:#1e293b; 
+  padding:30px; 
+  border-radius:12px; 
+  width:90%; 
+  max-width:400px; 
+  text-align:center; 
 }
-
-.menu-btn{
-font-size:28px;
-cursor:pointer;
-margin-right:15px;
+input { 
+  width:100%; 
+  padding:12px; 
+  margin:10px 0; 
+  border-radius:6px; 
+  border:none; 
+  font-size:16px; 
 }
-
-/* sidebar */
-
-.sidebar{
-position:fixed;
-left:-250px;
-top:0;
-width:250px;
-height:100%;
-background:#222;
-transition:0.3s;
-padding-top:60px;
+button { 
+  width:100%; 
+  padding:12px; 
+  border:none; 
+  border-radius:6px; 
+  background:#3b82f6; 
+  color:white; 
+  font-size:16px; 
+  cursor:pointer; 
+  margin-top:10px; 
 }
-
-.sidebar button{
-width:90%;
-margin:10px auto;
-display:block;
-padding:12px;
-border:none;
-background:#333;
-color:white;
-font-size:16px;
-cursor:pointer;
-border-radius:6px;
+button:hover { 
+  background:#2563eb; 
 }
-
-.sidebar button:hover{
-background:#555;
+.error { 
+  color:#f87171; 
+  margin-top:10px; 
 }
-
-/* main */
-
-.main{
-height:calc(100vh - 55px);
-}
-
-iframe{
-width:100%;
-height:100%;
-border:none;
-}
-
 </style>
 </head>
-
 <body>
-
-<!-- TOP BAR -->
-<div class="topbar">
-<span class="menu-btn" onclick="toggleMenu()">☰</span>
-Menu
-</div>
-
-<!-- SIDEBAR -->
-
-<div id="sidebar" class="sidebar">
-
-<button onclick="loadPage('.html')">Buy Voucher</button>
-
-<button onclick="loadPage('voucher.html')">Buy Voucher</button>
-
-<button onclick="loadPage('history.html')">History</button>
-
-<button onclick="loadPage('settings.html')">Settings</button>
-
-</div>
-
-<!-- MAIN CONTENT -->
-
-<div class="main" onclick="goHome()">
-
-<iframe id="frame" src="customer.html"></iframe>
-
+<div class="container">
+  <h2>Central Login</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="mpin" placeholder="MPIN">
+  <button onclick="login()">Login</button>
+  <div class="error" id="error"></div>
 </div>
 
 <script>
+let clients = [];
 
-let menuOpen=false;
-
-function toggleMenu(){
-
-let sidebar=document.getElementById("sidebar");
-
-if(menuOpen){
-sidebar.style.left="-250px";
-menuOpen=false;
-}else{
-sidebar.style.left="0";
-menuOpen=true;
+// Load clients from Google Apps Script
+function loadClients() {
+  const scriptURL = "https://script.google.com/macros/s/AKfycbwvFSK_-3K0ZcomEP1Hf8Cf92fbjU2hM3Af7EJBH90L1QoJ8ceYW9t8vksMmnahzKKj/exec?callback=clientsLoaded";
+  const script = document.createElement('script');
+  script.src = scriptURL;
+  document.body.appendChild(script);
 }
 
+// Callback when data is loaded
+function clientsLoaded(data) {
+  clients = data.map(c => ({
+    username: c.username.toString().trim(),
+    mpin: c.mpin.toString().trim(),
+    url: c.url.toString().trim()
+  }));
+  console.log("Loaded clients:", clients); // Debug
 }
 
-function loadPage(page){
+function login() {
+  const user = document.getElementById("username").value.trim();
+  const pin = document.getElementById("mpin").value.trim();
+  const errorDiv = document.getElementById("error");
 
-document.getElementById("frame").src=page;
+  const client = clients.find(c => 
+    c.username === user && 
+    c.mpin === pin
+  );
 
-toggleMenu();
-
+  if(client) {
+    errorDiv.textContent = "";
+    window.location.href = client.url;
+  } else {
+    errorDiv.textContent = "Invalid username or MPIN";
+  }
 }
 
-function goHome(){
-
-document.getElementById("frame").src="home.html";
-
-}
-
-/* Disable pinch zoom */
-
-document.addEventListener('gesturestart', function (e) {
-e.preventDefault();
-});
-
-document.addEventListener('touchmove', function (e) {
-if (e.scale !== 1) { e.preventDefault(); }
-}, { passive: false });
-
+// Load clients on page load
+loadClients();
 </script>
-
 </body>
 </html>
