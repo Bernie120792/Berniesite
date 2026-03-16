@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Sidebar System</title>
 
-<!-- Disable zoom -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <style>
@@ -44,25 +43,6 @@ height:100%;
 background:#222;
 transition:0.3s;
 padding-top:60px;
-}
-
-/* back arrow */
-
-.back-btn{
-width:90%;
-margin:10px auto;
-display:block;
-padding:12px;
-border:none;
-background:#444;
-color:white;
-font-size:18px;
-cursor:pointer;
-border-radius:6px;
-}
-
-.back-btn:hover{
-background:#666;
 }
 
 .sidebar button{
@@ -109,11 +89,9 @@ Menu
 
 <div id="sidebar" class="sidebar">
 
-<button class="back-btn" onclick="goHome()">Back home</button>
+<button onclick="loadPage('.html')">Buy Voucher</button>
 
-<button onclick="loadPage('uploadvouchers.html')">Upload vouchers </button>
-
-<button onclick="loadPage('firebase.html')">Buy Voucher</button>
+<button onclick="loadPage('voucher.html')">Buy Voucher</button>
 
 <button onclick="loadPage('history.html')">History</button>
 
@@ -123,7 +101,7 @@ Menu
 
 <!-- MAIN CONTENT -->
 
-<div class="main">
+<div class="main" onclick="goHome()">
 
 <iframe id="frame" src="customer.html"></iframe>
 
@@ -157,9 +135,7 @@ toggleMenu();
 
 function goHome(){
 
-document.getElementById("frame").src="customer.html";
-
-toggleMenu();
+document.getElementById("frame").src="home.html";
 
 }
 
