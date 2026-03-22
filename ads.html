@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sample Ads</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+  }
+
+  .ad-slide {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color: #fff;
+    border-radius: 12px;
+    transition: background 0.5s;
+  }
+
+  /* Background colors for each ad */
+  .ad1 { background-color: #e74c3c; }
+  .ad2 { background-color: #3498db; }
+  .ad3 { background-color: #f1c40f; color: black; }
+</style>
+</head>
+<body>
+
+<div id="ad" class="ad-slide ad1">
+  💥 Promo 1: Load 50₱, Get Extra 10₱! 💥
+</div>
+
+<script>
+  // Simple ad rotation
+  const ads = [
+    {text: "💥 Promo 1: Load 50₱, Get Extra 10₱! 💥", class: "ad1"},
+    {text: "🎉 Promo 2: Buy 100₱, Get 20₱ Bonus! 🎉", class: "ad2"},
+    {text: "🔥 Promo 3: Subscribe Fiber 1 Month Only 499₱! 🔥", class: "ad3"}
+  ];
+
+  let index = 0;
+  const adDiv = document.getElementById('ad');
+
+  setInterval(() => {
+    index = (index + 1) % ads.length;
+    adDiv.textContent = ads[index].text;
+    adDiv.className = 'ad-slide ' + ads[index].class;
+  }, 4000); // change every 4 seconds
+</script>
+
+</body>
+</html>
