@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+
+<meta charset="UTF-8">
+
+<!-- DISABLE ZOOM -->
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<title>Budget Tracker</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    touch-action:manipulation;
+    overscroll-behavior:none;
+}
+
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    padding:15px;
+}
+
+/* CONTAINER */
+.container{
+    max-width:700px;
+    margin:auto;
+}
+
+/* TITLE */
+.title{
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+/* SUMMARY */
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.box{
+    padding:15px;
+    border-radius:16px;
+    color:white;
+    text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.box h3{
+    font-size:13px;
+    opacity:0.9;
+}
+
+.box p{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.budget-box{
+    background:#2563eb;
+}
+
+.expense-box{
+    background:#ef4444;
+}
+
+.remaining-box{
+    background:#10b981;
+}
+
+/* FORM */
+.form-box{
+    background:white;
+    padding:18px;
+    border-radius:16px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    margin-bottom:15px;
+}
+
+input,button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:15px;
+    outline:none;
+}
+
+input:focus{
+    border:1px solid #2563eb;
+}
+
+button{
+    background:#111827;
+    color:white;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:active{
+    transform:scale(0.98);
+}
+
+/* HISTORY */
+.history-box{
+    background:white;
+    padding:15px;
+    border-radius:16px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.history-box h3{
+    margin-bottom:10px;
+}
+
+.history-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+}
+
+.history-item:last-child{
+    border-bottom:none;
+}
+
+/* MODAL */
+.modal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.modal-box{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    width:300px;
+    text-align:center;
+    animation:popup 0.2s ease;
+}
+
+@keyframes popup{
+    from{
+        transform:scale(0.8);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+.modal-buttons{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+}
+
+.modal-buttons button{
+    flex:1;
+    padding:10px;
+}
+
+.yes{
+    background:#16a34a;
+    color:white;
+}
+
+.no{
+    background:#dc2626;
+    color:white;
+}
+
+/* STATUS */
+#status{
+    text-align:center;
+    margin-top:10px;
+    font-weight:bold;
+    color:green;
+}
+
+/* MOBILE */
+@media(max-width:600px){
+
+.summary-grid{
+    grid-template-columns:1fr;
+}
+
+.title{
+    font-size:24px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="title">
+💰 Budget Tracker
+</div>
+
+<!-- SUMMARY -->
+<div class="summary-grid">
+
+<div class="box budget-box">
+<h3>Budget</h3>
+<p>₱<span id="budget">0</span></p>
+</div>
+
+<div class="box expense-box">
+<h3>Gastos</h3>
+<p>₱<span id="expense">0</span></p>
+</div>
+
+<div class="box remaining-box">
+<h3>Natitira</h3>
+<p>₱<span id="remaining">0</span></p>
+</div>
+
+</div>
+
+<!-- FORM -->
+<div class="form-box">
+
+<input type="number"
+id="budgetInput"
+placeholder="Enter Budget">
+
+<button onclick="openModal()">
+SAVE BUDGET
+</button>
+
+<input type="text"
+id="item"
+placeholder="Gastos">
+
+<input type="number"
+id="amount"
+placeholder="Halaga">
+
+<button onclick="saveExpense()">
+ADD GASTOS
+</button>
+
+<div id="status"></div>
+
+</div>
+
+<!-- HISTORY -->
+<div class="history-box">
+
+<h3>📜 History</h3>
+
+<div id="historyList"></div>
+
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+
+<div class="modal-box">
+
+<h3>
+Are you sure to change your current budget?
+</h3>
+
+<div class="modal-buttons">
+
+<button class="yes"
+onclick="confirmBudget()">
+YES
+</button>
+
+<button class="no"
+onclick="closeModal()">
+NO
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbwPlDw9j94LjkeQqUPhl99ii_V7Y1Szy_L3K1adjMO4GNBFuvnZZqeRMORP7G1G7A_k/exec";
+
+loadData();
+
+/* LOAD DATA */
+function loadData(){
+
+fetch(SCRIPT_URL)
+.then(res => res.json())
+.then(data => {
+
+document.getElementById("budget").innerText =
+data.budget || 0;
+
+document.getElementById("expense").innerText =
+data.expense || 0;
+
+document.getElementById("remaining").innerText =
+data.remaining || 0;
+
+/* HISTORY */
+let list =
+document.getElementById("historyList");
+
+list.innerHTML = "";
+
+if(data.history.length === 0){
+
+list.innerHTML =
+"<p style='text-align:center;color:gray;'>No history yet</p>";
+
+return;
+}
+
+data.history.forEach(h => {
+
+list.innerHTML += `
+<div class="history-item">
+
+<div>
+<b>${h.item}</b><br>
+<small>${h.date}</small>
+</div>
+
+<div style="
+color:red;
+font-weight:bold;">
+₱${h.amount}
+</div>
+
+</div>
+`;
+
+});
+
+})
+.catch(err => {
+
+document.getElementById("status").innerText =
+"Connection Error";
+
+});
+
+}
+
+/* OPEN MODAL */
+function openModal(){
+
+let b =
+document.getElementById("budgetInput").value;
+
+if(b == ""){
+
+alert("Enter budget");
+return;
+
+}
+
+document.getElementById("modal").style.display =
+"flex";
+
+}
+
+/* CLOSE MODAL */
+function closeModal(){
+
+document.getElementById("modal").style.display =
+"none";
+
+}
+
+/* SAVE BUDGET */
+function confirmBudget(){
+
+let budget =
+document.getElementById("budgetInput").value;
+
+fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify({
+type:"budget",
+budget:budget
+})
+})
+.then(r => r.text())
+.then(d => {
+
+document.getElementById("status").innerText =
+"Budget Updated";
+
+document.getElementById("budgetInput").value = "";
+
+closeModal();
+
+loadData();
+
+});
+
+}
+
+/* SAVE EXPENSE */
+function saveExpense(){
+
+let item =
+document.getElementById("item").value;
+
+let amount =
+document.getElementById("amount").value;
+
+if(item == "" || amount == ""){
+
+alert("Complete all fields");
+return;
+
+}
+
+fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify({
+type:"expense",
+item:item,
+amount:amount
+})
+})
+.then(r => r.text())
+.then(d => {
+
+document.getElementById("status").innerText =
+"Saved";
+
+document.getElementById("item").value = "";
+document.getElementById("amount").value = "";
+
+loadData();
+
+});
+
+}
+
+/* DISABLE DOUBLE TAP ZOOM */
+let lastTouchEnd = 0;
+
+document.addEventListener("touchend", function (event) {
+
+let now = (new Date()).getTime();
+
+if (now - lastTouchEnd <= 300) {
+event.preventDefault();
+}
+
+lastTouchEnd = now;
+
+}, false);
+
+</script>
+
+</body>
+</html>
