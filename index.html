@@ -45,6 +45,7 @@ body{
     font-size:28px;
     font-weight:bold;
     margin-bottom:15px;
+    color:#111827;
 }
 
 /* SUMMARY */
@@ -71,6 +72,7 @@ body{
 .box p{
     font-size:20px;
     font-weight:bold;
+    margin-top:5px;
 }
 
 .budget-box{
@@ -137,7 +139,7 @@ button:active{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:10px;
+    padding:12px 5px;
     border-bottom:1px solid #eee;
     font-size:14px;
 }
@@ -193,12 +195,10 @@ button:active{
 
 .yes{
     background:#16a34a;
-    color:white;
 }
 
 .no{
     background:#dc2626;
-    color:white;
 }
 
 /* STATUS */
@@ -213,11 +213,29 @@ button:active{
 @media(max-width:600px){
 
 .summary-grid{
-    grid-template-columns:1fr;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+}
+
+.box{
+    padding:10px;
+    border-radius:12px;
+}
+
+.box h3{
+    font-size:11px;
+}
+
+.box p{
+    font-size:15px;
 }
 
 .title{
     font-size:24px;
+}
+
+input,button{
+    font-size:14px;
 }
 
 }
@@ -256,7 +274,8 @@ button:active{
 <!-- FORM -->
 <div class="form-box">
 
-<input type="number"
+<input
+type="number"
 id="budgetInput"
 placeholder="Enter Budget">
 
@@ -264,11 +283,13 @@ placeholder="Enter Budget">
 SAVE BUDGET
 </button>
 
-<input type="text"
+<input
+type="text"
 id="item"
 placeholder="Gastos">
 
-<input type="number"
+<input
+type="number"
 id="amount"
 placeholder="Halaga">
 
@@ -353,6 +374,7 @@ list.innerHTML =
 "<p style='text-align:center;color:gray;'>No history yet</p>";
 
 return;
+
 }
 
 data.history.forEach(h => {
@@ -483,11 +505,11 @@ loadData();
 /* DISABLE DOUBLE TAP ZOOM */
 let lastTouchEnd = 0;
 
-document.addEventListener("touchend", function (event) {
+document.addEventListener("touchend", function(event){
 
 let now = (new Date()).getTime();
 
-if (now - lastTouchEnd <= 300) {
+if(now - lastTouchEnd <= 300){
 event.preventDefault();
 }
 
