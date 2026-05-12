@@ -4,7 +4,6 @@
 
 <meta charset="UTF-8">
 
-<!-- DISABLE ZOOM -->
 <meta name="viewport"
 content="width=device-width,
 initial-scale=1.0,
@@ -33,13 +32,11 @@ body{
     padding:15px;
 }
 
-/* CONTAINER */
 .container{
     max-width:700px;
     margin:auto;
 }
 
-/* TITLE */
 .title{
     text-align:center;
     font-size:28px;
@@ -123,6 +120,35 @@ button:active{
     transform:scale(0.98);
 }
 
+button:disabled{
+    opacity:0.7;
+    cursor:not-allowed;
+}
+
+/* SPINNER */
+.spinner{
+    display:none;
+    width:18px;
+    height:18px;
+    border:3px solid rgba(255,255,255,0.3);
+    border-top:3px solid white;
+    border-radius:50%;
+    animation:spin 0.7s linear infinite;
+    margin:auto;
+}
+
+@keyframes spin{
+
+0%{
+    transform:rotate(0deg);
+}
+
+100%{
+    transform:rotate(360deg);
+}
+
+}
+
 /* HISTORY */
 .history-box{
     background:white;
@@ -148,7 +174,32 @@ button:active{
     border-bottom:none;
 }
 
-/* MODAL */
+.action-buttons{
+    display:flex;
+    gap:5px;
+    justify-content:flex-end;
+}
+
+.small-btn{
+    padding:5px 8px;
+    border:none;
+    border-radius:6px;
+    color:white;
+    font-size:12px;
+    cursor:pointer;
+    width:auto;
+    margin-top:0;
+}
+
+.edit-btn{
+    background:#2563eb;
+}
+
+.delete-btn{
+    background:#dc2626;
+}
+
+/* MAIN MODAL */
 .modal{
     display:none;
     position:fixed;
@@ -172,14 +223,17 @@ button:active{
 }
 
 @keyframes popup{
-    from{
-        transform:scale(0.8);
-        opacity:0;
-    }
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
+
+from{
+    transform:scale(0.8);
+    opacity:0;
+}
+
+to{
+    transform:scale(1);
+    opacity:1;
+}
+
 }
 
 .modal-buttons{
@@ -293,8 +347,17 @@ type="number"
 id="amount"
 placeholder="Halaga">
 
-<button onclick="saveExpense()">
+<button id="expenseBtn"
+onclick="saveExpense()">
+
+<span id="btnText">
 ADD GASTOS
+</span>
+
+<span id="spinner"
+class="spinner">
+</span>
+
 </button>
 
 <div id="status"></div>
@@ -312,7 +375,7 @@ ADD GASTOS
 
 </div>
 
-<!-- MODAL -->
+<!-- SAVE BUDGET MODAL -->
 <div class="modal" id="modal">
 
 <div class="modal-box">
@@ -342,9 +405,133 @@ NO
 <script>
 
 const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbwPlDw9j94LjkeQqUPhl99ii_V7Y1Szy_L3K1adjMO4GNBFuvnZZqeRMORP7G1G7A_k/exec";
+"https://script.google.com/macros/s/AKfycbzq5oTOjjTfM9BDbrS0pUi5cpSFqQpL69GLNDzJAyJIvy_8hNdVPTcG4MHU2xw16lMMWw/exec";
 
 loadData();
+
+/* CUSTOM MODAL */
+function showModal(title,callback=null,type="alert",defaultValue=""){
+
+const modal = document.createElement("div");
+
+modal.style.position = "fixed";
+modal.style.top = "0";
+modal.style.left = "0";
+modal.style.width = "100%";
+modal.style.height = "100%";
+modal.style.background = "rgba(0,0,0,0.5)";
+modal.style.display = "flex";
+modal.style.justifyContent = "center";
+modal.style.alignItems = "center";
+modal.style.zIndex = "9999";
+
+let inputHTML = "";
+
+if(type === "prompt"){
+
+inputHTML = `
+<input id="modalInput"
+value="${defaultValue}"
+style="
+width:100%;
+padding:12px;
+margin-top:15px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:16px;
+">
+`;
+
+}
+
+modal.innerHTML = `
+
+<div style="
+background:white;
+padding:20px;
+border-radius:15px;
+width:320px;
+animation:popup 0.2s ease;
+text-align:center;
+">
+
+<h3 style="
+margin-bottom:10px;
+color:#111827;
+">
+${title}
+</h3>
+
+${inputHTML}
+
+<div style="
+display:flex;
+gap:10px;
+margin-top:15px;
+">
+
+<button id="okBtn"
+style="
+flex:1;
+padding:10px;
+border:none;
+border-radius:10px;
+background:#16a34a;
+color:white;
+font-weight:bold;
+">
+OK
+</button>
+
+<button id="cancelBtn"
+style="
+flex:1;
+padding:10px;
+border:none;
+border-radius:10px;
+background:#dc2626;
+color:white;
+font-weight:bold;
+">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+`;
+
+document.body.appendChild(modal);
+
+document.getElementById("okBtn")
+.onclick = function(){
+
+let value = true;
+
+if(type === "prompt"){
+
+value =
+document.getElementById("modalInput").value;
+
+}
+
+document.body.removeChild(modal);
+
+if(callback){
+callback(value);
+}
+
+};
+
+document.getElementById("cancelBtn")
+.onclick = function(){
+
+document.body.removeChild(modal);
+
+};
+
+}
 
 /* LOAD DATA */
 function loadData(){
@@ -362,13 +549,12 @@ data.expense || 0;
 document.getElementById("remaining").innerText =
 data.remaining || 0;
 
-/* HISTORY */
 let list =
 document.getElementById("historyList");
 
 list.innerHTML = "";
 
-if(data.history.length === 0){
+if(!data.history || data.history.length === 0){
 
 list.innerHTML =
 "<p style='text-align:center;color:gray;'>No history yet</p>";
@@ -380,6 +566,7 @@ return;
 data.history.forEach(h => {
 
 list.innerHTML += `
+
 <div class="history-item">
 
 <div>
@@ -387,13 +574,35 @@ list.innerHTML += `
 <small>${h.date}</small>
 </div>
 
+<div style="text-align:right;">
+
 <div style="
 color:red;
-font-weight:bold;">
+font-weight:bold;
+margin-bottom:5px;">
 ₱${h.amount}
 </div>
 
+<div class="action-buttons">
+
+<button
+class="small-btn edit-btn"
+onclick="editExpense(${h.row},${h.amount})">
+Edit
+</button>
+
+<button
+class="small-btn delete-btn"
+onclick="deleteExpense(${h.row})">
+Delete
+</button>
+
 </div>
+
+</div>
+
+</div>
+
 `;
 
 });
@@ -408,7 +617,7 @@ document.getElementById("status").innerText =
 
 }
 
-/* OPEN MODAL */
+/* OPEN SAVE MODAL */
 function openModal(){
 
 let b =
@@ -416,7 +625,7 @@ document.getElementById("budgetInput").value;
 
 if(b == ""){
 
-alert("Enter budget");
+showModal("Enter budget");
 return;
 
 }
@@ -426,7 +635,7 @@ document.getElementById("modal").style.display =
 
 }
 
-/* CLOSE MODAL */
+/* CLOSE SAVE MODAL */
 function closeModal(){
 
 document.getElementById("modal").style.display =
@@ -464,7 +673,13 @@ loadData();
 }
 
 /* SAVE EXPENSE */
+let isSavingExpense = false;
+
 function saveExpense(){
+
+if(isSavingExpense){
+return;
+}
 
 let item =
 document.getElementById("item").value;
@@ -474,10 +689,23 @@ document.getElementById("amount").value;
 
 if(item == "" || amount == ""){
 
-alert("Complete all fields");
+showModal("Complete all fields");
 return;
 
 }
+
+isSavingExpense = true;
+
+let btn =
+document.getElementById("expenseBtn");
+
+btn.disabled = true;
+
+document.getElementById("btnText").style.display =
+"none";
+
+document.getElementById("spinner").style.display =
+"inline-block";
 
 fetch(SCRIPT_URL,{
 method:"POST",
@@ -498,7 +726,100 @@ document.getElementById("amount").value = "";
 
 loadData();
 
+})
+.finally(()=>{
+
+isSavingExpense = false;
+
+btn.disabled = false;
+
+document.getElementById("btnText").style.display =
+"inline";
+
+document.getElementById("spinner").style.display =
+"none";
+
 });
+
+}
+
+/* EDIT EXPENSE */
+function editExpense(row,currentAmount){
+
+showModal(
+"Edit Amount",
+function(newAmount){
+
+if(newAmount == ""){
+return;
+}
+
+fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify({
+type:"editExpense",
+row:row,
+amount:newAmount
+})
+})
+.then(r=>r.text())
+.then(d=>{
+
+document.getElementById("status").innerText =
+"Expense Updated";
+
+loadData();
+
+});
+
+},
+"prompt",
+currentAmount
+);
+
+}
+
+/* DELETE EXPENSE */
+function deleteExpense(row){
+
+showModal(
+"Enter MPIN to delete",
+function(mpin){
+
+if(mpin !== "1207"){
+
+showModal("Wrong MPIN");
+return;
+
+}
+
+showModal(
+"Delete this expense?",
+function(){
+
+fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify({
+type:"deleteExpense",
+row:row
+})
+})
+.then(r=>r.text())
+.then(d=>{
+
+document.getElementById("status").innerText =
+"Expense Deleted";
+
+loadData();
+
+});
+
+}
+);
+
+},
+"prompt"
+);
 
 }
 
