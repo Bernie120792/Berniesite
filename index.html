@@ -45,6 +45,27 @@ body{
     color:#111827;
 }
 
+/* OFFLINE PAGE */
+.offline-page{
+    display:none;
+    text-align:center;
+    padding:40px 20px;
+}
+
+.offline-page h1{
+    font-size:70px;
+}
+
+.offline-page h2{
+    margin-top:10px;
+    color:#111827;
+}
+
+.offline-page p{
+    margin-top:10px;
+    color:#6b7280;
+}
+
 /* SUMMARY */
 .summary-grid{
     display:grid;
@@ -157,10 +178,6 @@ button:disabled{
     box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-.history-box h3{
-    margin-bottom:10px;
-}
-
 .history-item{
     display:flex;
     justify-content:space-between;
@@ -199,7 +216,7 @@ button:disabled{
     background:#dc2626;
 }
 
-/* MAIN MODAL */
+/* MODAL */
 .modal{
     display:none;
     position:fixed;
@@ -217,7 +234,7 @@ button:disabled{
     background:white;
     padding:20px;
     border-radius:15px;
-    width:300px;
+    width:320px;
     text-align:center;
     animation:popup 0.2s ease;
 }
@@ -255,7 +272,6 @@ to{
     background:#dc2626;
 }
 
-/* STATUS */
 #status{
     text-align:center;
     margin-top:10px;
@@ -263,7 +279,6 @@ to{
     color:green;
 }
 
-/* MOBILE */
 @media(max-width:600px){
 
 .summary-grid{
@@ -273,7 +288,6 @@ to{
 
 .box{
     padding:10px;
-    border-radius:12px;
 }
 
 .box h3{
@@ -299,10 +313,26 @@ input,button{
 
 <body>
 
+<!-- OFFLINE PAGE -->
+<div id="offlinePage" class="offline-page">
+
+<h1>📡</h1>
+
+<h2>No Internet Connection</h2>
+
+<p>
+Please connect to internet
+</p>
+
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp">
+
 <div class="container">
 
 <div class="title">
-💰 Budget Tracker
+💰 WEEKLY BUDGET TRACKER
 </div>
 
 <!-- SUMMARY -->
@@ -367,9 +397,37 @@ class="spinner">
 <!-- HISTORY -->
 <div class="history-box">
 
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+gap:10px;
+">
+
 <h3>📜 History</h3>
 
+<button
+onclick="deleteAllExpenses()"
+style="
+width:auto;
+padding:8px 12px;
+background:#b91c1c;
+border:none;
+border-radius:8px;
+color:white;
+font-size:12px;
+font-weight:bold;
+margin-top:0;
+">
+DELETE ALL
+</button>
+
+</div>
+
 <div id="historyList"></div>
+
+</div>
 
 </div>
 
@@ -405,9 +463,37 @@ NO
 <script>
 
 const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbzq5oTOjjTfM9BDbrS0pUi5cpSFqQpL69GLNDzJAyJIvy_8hNdVPTcG4MHU2xw16lMMWw/exec";
+"https://script.google.com/macros/s/AKfycbw5bw3TLd8pogtQ8kMI7n8Lz0n3A8RzhxBpSm8ZV1fwds0Ge7vGrclI-VkSV0jpZEjQ/exec";
+
+/* INTERNET CHECK */
+function checkInternet(){
+
+if(navigator.onLine){
+
+document.getElementById("offlinePage").style.display =
+"none";
+
+document.getElementById("mainApp").style.display =
+"block";
 
 loadData();
+
+}else{
+
+document.getElementById("offlinePage").style.display =
+"block";
+
+document.getElementById("mainApp").style.display =
+"none";
+
+}
+
+}
+
+window.addEventListener("online",checkInternet);
+window.addEventListener("offline",checkInternet);
+
+checkInternet();
 
 /* CUSTOM MODAL */
 function showModal(title,callback=null,type="alert",defaultValue=""){
@@ -617,7 +703,6 @@ document.getElementById("status").innerText =
 
 }
 
-/* OPEN SAVE MODAL */
 function openModal(){
 
 let b =
@@ -635,7 +720,6 @@ document.getElementById("modal").style.display =
 
 }
 
-/* CLOSE SAVE MODAL */
 function closeModal(){
 
 document.getElementById("modal").style.display =
@@ -643,7 +727,6 @@ document.getElementById("modal").style.display =
 
 }
 
-/* SAVE BUDGET */
 function confirmBudget(){
 
 let budget =
@@ -672,7 +755,6 @@ loadData();
 
 }
 
-/* SAVE EXPENSE */
 let isSavingExpense = false;
 
 function saveExpense(){
@@ -743,7 +825,6 @@ document.getElementById("spinner").style.display =
 
 }
 
-/* EDIT EXPENSE */
 function editExpense(row,currentAmount){
 
 showModal(
@@ -779,7 +860,6 @@ currentAmount
 
 }
 
-/* DELETE EXPENSE */
 function deleteExpense(row){
 
 showModal(
@@ -823,7 +903,48 @@ loadData();
 
 }
 
-/* DISABLE DOUBLE TAP ZOOM */
+function deleteAllExpenses(){
+
+showModal(
+"Enter MPIN to delete all",
+function(mpin){
+
+if(mpin !== "1207"){
+
+showModal("Wrong MPIN");
+return;
+
+}
+
+showModal(
+"Delete ALL expenses?",
+function(){
+
+fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify({
+type:"deleteAll"
+})
+})
+.then(r=>r.text())
+.then(d=>{
+
+document.getElementById("status").innerText =
+"All Expenses Deleted";
+
+loadData();
+
+});
+
+}
+);
+
+},
+"prompt"
+);
+
+}
+
 let lastTouchEnd = 0;
 
 document.addEventListener("touchend", function(event){
