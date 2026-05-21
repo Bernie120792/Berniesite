@@ -403,9 +403,31 @@ justify-content:space-between;
 align-items:center;
 margin-bottom:10px;
 gap:10px;
+flex-wrap:wrap;
 ">
 
 <h3>📜 History</h3>
+
+<div style="
+display:flex;
+gap:8px;
+">
+
+<button
+onclick="copyHistory()"
+style="
+width:auto;
+padding:8px 12px;
+background:#2563eb;
+border:none;
+border-radius:8px;
+color:white;
+font-size:12px;
+font-weight:bold;
+margin-top:0;
+">
+COPY
+</button>
 
 <button
 onclick="deleteAllExpenses()"
@@ -422,6 +444,8 @@ margin-top:0;
 ">
 DELETE ALL
 </button>
+
+</div>
 
 </div>
 
@@ -649,15 +673,14 @@ return;
 
 }
 
-data.history.forEach(h => {
+data.history.reverse().forEach(h => {
 
 list.innerHTML += `
 
 <div class="history-item">
 
 <div>
-<b>${h.item}</b><br>
-<small>${h.date}</small>
+<b>${h.item}</b>
 </div>
 
 <div style="text-align:right;">
@@ -942,6 +965,70 @@ loadData();
 },
 "prompt"
 );
+
+}
+
+function copyHistory(){
+
+let budget =
+document.getElementById("budget").innerText;
+
+let expense =
+document.getElementById("expense").innerText;
+
+let remaining =
+document.getElementById("remaining").innerText;
+
+let historyItems =
+document.querySelectorAll(".history-item");
+
+let text =
+"💰 WEEKLY BUDGET TRACKER\n\n";
+
+text +=
+"Budget: ₱" + budget + "\n";
+
+text +=
+"Gastos: ₱" + expense + "\n";
+
+text +=
+"Natitira: ₱" + remaining + "\n\n";
+
+text += "📜 HISTORY\n\n";
+
+if(historyItems.length === 0){
+
+text += "No history yet";
+
+}else{
+
+historyItems.forEach(item => {
+
+let name =
+item.querySelector("b").innerText;
+
+let amount =
+item.querySelector("div[style*='color:red']").innerText;
+
+text +=
+name + " - " + amount + "\n";
+
+});
+
+}
+
+navigator.clipboard.writeText(text)
+.then(()=>{
+
+document.getElementById("status").innerText =
+"History Copied";
+
+})
+.catch(()=>{
+
+showModal("Failed to copy");
+
+});
 
 }
 
