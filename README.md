@@ -1,2 +1,0 @@
-# Berniesite
-Client pages system
